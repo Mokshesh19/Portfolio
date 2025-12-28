@@ -30,24 +30,40 @@ const Projects = () => {
     ];
 
     useEffect(() => {
-        const pin = gsap.fromTo(sectionRef.current,
-            { translateX: 0 },
-            {
-                translateX: "-200vw", // Move horizontally by (total width - viewport width)
-                ease: "none",
-                duration: 1,
-                scrollTrigger: {
-                    trigger: triggerRef.current,
-                    start: "top top",
-                    end: "+=4000",
-                    scrub: 1,
-                    pin: true,
-                }
+        const section = sectionRef.current;
+        const trigger = triggerRef.current;
+
+        if (!section || !trigger) {
+            return undefined;
+        }
+
+        const getTotalScrollDistance = () => {
+            const scrollWidth = section.scrollWidth;
+            const viewportWidth = window.innerWidth || scrollWidth;
+            return Math.max(scrollWidth - viewportWidth, 0);
+        };
+
+        const animation = gsap.to(section, {
+            x: () => -getTotalScrollDistance(),
+            ease: "none",
+            scrollTrigger: {
+                trigger,
+                start: "top top",
+                end: () => `+=${getTotalScrollDistance() || window.innerHeight}`,
+                scrub: 1,
+                pin: true,
+                pinSpacing: true,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
             }
-        );
+        });
+
+        const resizeHandler = () => ScrollTrigger.refresh();
+        window.addEventListener('resize', resizeHandler);
 
         return () => {
-            pin.kill();
+            animation.kill();
+            window.removeEventListener('resize', resizeHandler);
         };
     }, []);
 
