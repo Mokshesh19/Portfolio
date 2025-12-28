@@ -39,14 +39,23 @@ const Navbar = () => {
             // The final scroll position accounts for pinned section scroll distances
             const finalScrollPosition = elementTop + additionalScroll - 50;
 
-            gsap.to(window, {
-                duration: 2,
-                scrollTo: {
-                    y: finalScrollPosition,
-                    autoKill: false
-                },
-                ease: 'power2.inOut'
-            });
+            const lenisInstance = typeof window !== 'undefined' ? window.lenis : null;
+
+            if (lenisInstance && typeof lenisInstance.scrollTo === 'function') {
+                lenisInstance.scrollTo(finalScrollPosition, {
+                    duration: 1.6,
+                    easing: (t) => 1 - Math.pow(1 - t, 3)
+                });
+            } else {
+                gsap.to(window, {
+                    duration: 2,
+                    scrollTo: {
+                        y: finalScrollPosition,
+                        autoKill: false
+                    },
+                    ease: 'power2.inOut'
+                });
+            }
         }
     };
 

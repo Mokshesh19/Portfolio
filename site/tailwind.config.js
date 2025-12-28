@@ -14,6 +14,7 @@ export default {
         'smoke': '#9C9890',     // Darker grey-brown from ref
         'was-paper': '#F0EBE0', // Mapping main bg to 'bone'
         'wood': '#8B5E3C',      // Keeping existing accent
+        'matcha': '#8A9A5B',    // Muted green for accents
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

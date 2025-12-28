@@ -3,7 +3,7 @@ import React from 'react';
 const Contact = () => {
     return (
         <footer id="contact" className="w-full bg-sumi-ink text-was-paper py-24 px-6 flex flex-col items-center justify-center text-center relative overflow-hidden z-10">
-            <div className="absolute inset-0 opacity-10 noise-overlay mix-blend-overlay"></div>
+            <div className="absolute inset-0 opacity-10 noise-overlay mix-blend-overlay pointer-events-none" aria-hidden="true"></div>
 
             <p className="text-matcha uppercase tracking-[0.3em] text-sm mb-8">Ready to Collaborate?</p>
 

@@ -16,15 +16,27 @@ const Layout = ({ children }) => {
             touchMultiplier: 2,
         });
 
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
+        if (typeof window !== 'undefined') {
+            window.lenis = lenis;
         }
 
-        requestAnimationFrame(raf);
+        let rafId = null;
+
+        function raf(time) {
+            lenis.raf(time);
+            rafId = requestAnimationFrame(raf);
+        }
+
+        rafId = requestAnimationFrame(raf);
 
         return () => {
             lenis.destroy();
+            if (typeof window !== 'undefined' && window.lenis === lenis) {
+                delete window.lenis;
+            }
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
         };
     }, []);
 
