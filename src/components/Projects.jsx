@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import useIsMobile from '../hooks/useIsMobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Projects = () => {
     const sectionRef = useRef(null);
     const triggerRef = useRef(null);
+    const isMobile = useIsMobile();
 
     const projects = [
         {
@@ -30,6 +32,11 @@ const Projects = () => {
     ];
 
     useEffect(() => {
+        // Skip horizontal scroll animation on mobile - use simple vertical layout instead
+        if (isMobile) {
+            return;
+        }
+
         const section = sectionRef.current;
         const trigger = triggerRef.current;
 
@@ -50,7 +57,7 @@ const Projects = () => {
                 trigger,
                 start: "top top",
                 end: () => `+=${getTotalScrollDistance() || window.innerHeight}`,
-                scrub: 1,
+                scrub: 2, // Increased from 1 for smoother animation
                 pin: true,
                 pinSpacing: true,
                 anticipatePin: 1,
@@ -65,8 +72,37 @@ const Projects = () => {
             animation.kill();
             window.removeEventListener('resize', resizeHandler);
         };
-    }, []);
+    }, [isMobile]);
 
+    // Mobile layout - simple vertical stack (no horizontal scroll animation)
+    if (isMobile) {
+        return (
+            <div id="projects" className="w-full relative z-20 bg-was-paper py-16">
+                <div className="flex flex-col">
+                    {projects.map((project, index) => (
+                        <div
+                            key={index}
+                            className={`w-full min-h-[80vh] flex flex-col justify-center items-center p-8 ${project.color} border-b border-sumi-ink/5 relative`}
+                        >
+                            <div className="max-w-xl text-center">
+                                <span className="text-6xl absolute top-8 left-8 font-serif text-sumi-ink/5 select-none">{`0${index + 1}`}</span>
+                                <h3 className="text-4xl font-serif text-sumi-ink mb-4">{project.title}</h3>
+                                <p className="text-matcha uppercase tracking-widest text-xs mb-6">{project.tech}</p>
+                                <p className="text-lg text-sumi-ink/80 leading-relaxed font-light">
+                                    {project.desc}
+                                </p>
+                                <button className="mt-8 px-6 py-2 border border-sumi-ink/20 hover:bg-sumi-ink hover:text-was-paper transition-all duration-300 uppercase text-xs tracking-[0.2em]">
+                                    View Case Study
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Desktop layout - horizontal scroll
     return (
         <div id="projects" ref={triggerRef} className="h-screen w-full overflow-hidden relative z-20 bg-was-paper">
             <div

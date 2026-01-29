@@ -1,6 +1,16 @@
 import React from 'react';
+import useIsMobile from '../hooks/useIsMobile';
 
 const TextureOverlay = () => {
+    const isMobile = useIsMobile();
+
+    // Skip expensive SVG filters on mobile - feTurbulence is extremely GPU-intensive
+    if (isMobile) {
+        return (
+            <div className="fixed inset-0 z-50 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(44,44,44,0.05)_100%)]" />
+        );
+    }
+
     return (
         <>
             <svg className="fixed inset-0 z-0 pointer-events-none opacity-[0.4] w-full h-full mix-blend-multiply">
