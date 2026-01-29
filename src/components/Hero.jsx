@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import useIsMobile from '../hooks/useIsMobile';
 
 const KINTSUGI_CRACKS = [
     {
@@ -37,6 +38,7 @@ const Hero = () => {
     const nameRef = useRef(null);
     const titleRef = useRef(null);
     const circleRef = useRef(null);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         const tl = gsap.timeline();
@@ -87,8 +89,10 @@ const Hero = () => {
             }, index * 0.25);
         });
 
-        const shimmerTimeline = crackPaths.length
-            ? gsap.timeline({
+        // Only run infinite shimmer animation on desktop - it's too expensive for mobile
+        let shimmerTimeline = null;
+        if (!isMobile && crackPaths.length) {
+            shimmerTimeline = gsap.timeline({
                 repeat: -1,
                 yoyo: true,
                 defaults: { ease: 'sine.inOut' },
@@ -100,8 +104,8 @@ const Hero = () => {
                 },
                 duration: 3,
                 stagger: { each: 1.1, from: 'center' }
-            })
-            : null;
+            });
+        }
 
         return () => {
             tl.kill();
@@ -110,17 +114,17 @@ const Hero = () => {
                 shimmerTimeline.kill();
             }
         };
-    }, []);
+    }, [isMobile]);
 
     return (
         <section ref={containerRef} className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden">
-            {/* Abstract Zen Circle (Enso) Background */}
+            {/* Abstract Zen Circle (Enso) Background - simplified on mobile */}
             <div
                 ref={circleRef}
-                className="absolute w-[60vw] h-[60vw] md:w-[30vw] md:h-[30vw] rounded-full border border-sumi-ink/20 blur-sm pointer-events-none"
+                className={`absolute w-[60vw] h-[60vw] md:w-[30vw] md:h-[30vw] rounded-full border border-sumi-ink/20 pointer-events-none ${!isMobile ? 'blur-sm' : ''}`}
             ></div>
 
-            {/* Kintsugi-inspired golden cracks */}
+            {/* Kintsugi-inspired golden cracks - simplified rendering on mobile */}
             {KINTSUGI_CRACKS.map((crack, index) => {
                 const gradientId = `kintsugi-gradient-${index}`;
                 const glowId = `kintsugi-glow-${index}`;
@@ -128,7 +132,7 @@ const Hero = () => {
                     <svg
                         key={`kintsugi-crack-${index}`}
                         aria-hidden="true"
-                        className="absolute pointer-events-none mix-blend-screen drop-shadow-[0_0_20px_rgba(255,224,181,0.35)]"
+                        className={`absolute pointer-events-none ${!isMobile ? 'mix-blend-screen drop-shadow-[0_0_20px_rgba(255,224,181,0.35)]' : ''}`}
                         style={{ ...crack.style, opacity: 0.75 }}
                         viewBox={crack.viewBox}
                         preserveAspectRatio="none"
@@ -141,13 +145,16 @@ const Hero = () => {
                                 <stop offset="78%" stopColor="#FFF2C5" />
                                 <stop offset="100%" stopColor="#FFFFFF" />
                             </linearGradient>
-                            <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="5" result="blurred" />
-                                <feMerge>
-                                    <feMergeNode in="blurred" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
+                            {/* Only include expensive blur filter on desktop */}
+                            {!isMobile && (
+                                <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="5" result="blurred" />
+                                    <feMerge>
+                                        <feMergeNode in="blurred" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
+                            )}
                         </defs>
                         {crack.paths.map((path, pathIndex) => (
                             <path
@@ -160,7 +167,7 @@ const Hero = () => {
                                 strokeLinejoin="round"
                                 className="kintsugi-path"
                                 data-base-opacity={crack.baseOpacity ?? 0.75}
-                                filter={`url(#${glowId})`}
+                                filter={!isMobile ? `url(#${glowId})` : undefined}
                             />
                         ))}
                     </svg>
